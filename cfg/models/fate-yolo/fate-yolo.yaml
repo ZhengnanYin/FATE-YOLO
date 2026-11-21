@@ -1,0 +1,35 @@
+# YOLO11n + one paper-style DAABlock in P5 branch.
+# Custom module is registered in train.py; args are explicit [c_in, c_out].
+nc: 80
+legacy: false
+scale: n
+scales:
+  n: [0.50, 0.25, 1024]
+
+backbone:
+  - [-1, 1, Conv, [64, 3, 2]]
+  - [-1, 1, FTConv, [128, 3, 2]]
+  - [-1, 2, DAABlock, [256]]
+  - [-1, 1, FTConv, [256, 3, 2]]
+  - [-1, 2, DAABlock, [512]]
+  - [-1, 1, FTConv, [512, 3, 2]]
+  - [-1, 2, DAABlock, [512]]
+  - [-1, 1, FTConv, [1024, 3, 2]]
+  - [-1, 2, DAABlock, [1024]]
+  - [-1, 1, SPPF, [1024, 5]]
+  - [-1, 2, DAABlock, [1024]]
+
+head:
+  - [-1, 1, nn.Upsample, [None, 2, 'nearest']] # 11
+  - [[-1, 6], 1, Concat, [1]]                   # 12
+  - [-1, 2, GLDBlock, [512]]                # 13
+  - [-1, 1, nn.Upsample, [None, 2, 'nearest']] # 14
+  - [[-1, 4], 1, Concat, [1]]                  # 15
+  - [-1, 2, GLDBlock, [256]]               # 16 (P3)
+  - [-1, 1, FTConv, [256, 3, 2]]                # 17
+  - [[-1, 13], 1, Concat, [1]]                 # 18
+  - [-1, 2, GLDBlock, [512]]               # 19 (P4)
+  - [-1, 1, FTConv, [512, 3, 2]]                # 20
+  - [[-1, 10], 1, Concat, [1]]                 # 21
+  - [-1, 1, GLDBlock, [1024]]              # 22 (P5), does not change channels
+  - [[16, 19, 22], 1, FATEHead, [nc]]

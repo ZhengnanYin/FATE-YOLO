@@ -1,0 +1,6 @@
+train: C://ultralytics-main/datasets/tumor/train/
+val: C://ultralytics-main/datasets/tumor/val/
+test: C://ultralytics-main/datasets/tumor/test/
+
+nc: 1
+names: ['Brain tumor']
